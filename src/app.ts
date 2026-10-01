@@ -1,7 +1,23 @@
 import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+import { env } from './config/env.js';
+import { errorHandler } from './middlewares/errors.js';
+import authRoutes from './routes/auth.routes.js';
+import taskRoutes from './routes/task.routes.js';
 
 const app = express();
-
-app.use(express.json());
-
+app.disable('x-powered-by');
+if (env.TRUST_PROXY) app.set('trust proxy', env.TRUST_PROXY);
+app.use(helmet());
+app.use(cors({ origin: env.FRONTEND_ORIGIN, credentials: true, methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'] }));
+app.use(express.json({ limit: '32kb' }));
+app.use(cookieParser());
+app.use('/api', (_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
+app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
+app.use('/api/auth', authRoutes);
+app.use('/api/tasks', taskRoutes);
+app.use((_req, res) => { res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Endpoint not found.' } }); });
+app.use(errorHandler);
 export default app;

@@ -1,1 +1,12 @@
-node_modules
+node_modules/
+dist/
+src/generated/
+.env
+.env.*
+!.env.example
+coverage/
+*.log
+.npm-cache/
+
+.validation/
+.local/

@@ -1,24 +1,18 @@
 {
   "compilerOptions": {
     "target": "ES2023",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "lib": ["ES2023"],
     "rootDir": "src",
     "outDir": "dist",
     "strict": true,
-    "noImplicitAny": true,
-    "allowJs": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
     "sourceMap": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "rewriteRelativeImportExtensions": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "frontend"]
 }

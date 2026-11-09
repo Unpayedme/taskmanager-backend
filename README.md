@@ -4,7 +4,7 @@ A Vue 3 / TypeScript / Quasar frontend and Express / TypeScript / Prisma / Postg
 
 ## Run locally
 
-Use Node 26 (or another version supported by the frontend's `engines`) and PostgreSQL. These commands work in Command Prompt or PowerShell.
+Use Node 26 and PostgreSQL. These commands work in Command Prompt or PowerShell.
 
 1. Start the backend:
 
@@ -106,7 +106,7 @@ The integration suite creates its own test users and removes them afterward. It 
 
 ## Production
 
-Set `NODE_ENV=production`, strong distinct secrets, HTTPS frontend and Google redirect URLs, and the exact trusted `FRONTEND_ORIGIN`. Set `TRUST_PROXY` only to the number of trusted reverse-proxy hops. Serve `taskmanager-frontend/dist/spa` through HTTPS; proxy `/api` to the backend, or build the frontend with `QCLI_API_BASE_URL` set to your absolute HTTPS API URL. For a separate API, also add its exact HTTPS origin to `connect-src` in `taskmanager-frontend/index.html`. Keep the PostgreSQL server private. Use `npm.cmd run db:deploy` for migrations, `npm.cmd run build` for each project, and `npm.cmd start` for the API. For a genuinely cross-site deployment, set `COOKIE_SAME_SITE=none` with HTTPS; browser third-party-cookie policies may require a same-site reverse proxy instead. Multiple API instances need a shared rate-limit store; the default limiter is for a single instance. Expired session rows may be periodically pruned after `expiresAt`.
+Follow the [Railway + Vercel deployment guide](docs/deployment-railway-vercel.md). The checked-in configuration builds the API with Railpack, runs database migrations before deployment, checks database readiness, and serves the frontend through Vercel with a server-only API proxy. Production authentication uses secure cookies on the Vercel frontend host. Use Node 26 and configure the required hosting variables before deploying.
 
 ## Browser tests
 

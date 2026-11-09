@@ -6,7 +6,10 @@ import request from 'supertest';
 
 process.env.NODE_ENV = 'production';
 process.env.FRONTEND_ORIGIN = 'https://tasks.example.com';
-process.env.GOOGLE_REDIRECT_URI = 'https://api.example.com/api/auth/google/callback';
+process.env.GOOGLE_REDIRECT_URI = 'https://tasks.example.com/api/auth/google/callback';
+process.env.API_PROXY_SECRET = 'production-proxy-secret-with-at-least-32-characters';
+process.env.ACCESS_TOKEN_SECRET = 'production-access-key-3bd0358ac92cfe848d8d';
+process.env.REFRESH_TOKEN_SECRET = 'production-refresh-key-bd5ee65d8a2a7ce7eac7';
 process.env.COOKIE_SAME_SITE = 'none';
 const { setRefreshCookie, clearRefreshCookie } = await import('../src/utils/cookies.js');
 const app = express();

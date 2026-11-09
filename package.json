@@ -15,7 +15,8 @@
     "db:studio": "prisma studio --config prisma7.config.ts",
     "predev": "node scripts/prepare-dev.mjs && npm run db:generate",
     "setup:dev": "node scripts/prepare-dev.mjs",
-    "db:stop": "node scripts/stop-dev-db.mjs"
+    "db:stop": "node scripts/stop-dev-db.mjs",
+    "check:production": "tsx scripts/check-production.ts"
   },
   "keywords": [],
   "author": "",
@@ -34,7 +35,8 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.1",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "prisma": "7.10.0"
   },
   "devDependencies": {
     "@types/nodemailer": "^8.0.2",
@@ -46,7 +48,6 @@
     "@types/node": "^26.6.3",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^6.0.3",
-    "prisma": "7.10.0",
     "supertest": "^7.2.2",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3"
@@ -55,5 +56,8 @@
   "overrides": {
     "deepmerge-ts": "^8.0.2",
     "mysql2": "^3.24.5"
+  },
+  "engines": {
+    "node": "26.x"
   }
 }

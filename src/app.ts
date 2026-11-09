@@ -6,6 +6,8 @@ import { env } from './config/env.js';
 import { errorHandler } from './middlewares/errors.js';
 import authRoutes from './routes/auth.routes.js';
 import taskRoutes from './routes/task.routes.js';
+import { databaseHealth } from './lib/prisma.js';
+import { requireApiProxy } from './middlewares/proxy.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -16,6 +18,15 @@ app.use(express.json({ limit: '32kb' }));
 app.use(cookieParser());
 app.use('/api', (_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/api/ready', async (_req, res) => {
+  try {
+    await databaseHealth.check();
+    res.json({ status: 'ready' });
+  } catch {
+    res.status(503).json({ status: 'unavailable' });
+  }
+});
+app.use('/api', requireApiProxy);
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use((_req, res) => { res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Endpoint not found.' } }); });

@@ -4,6 +4,7 @@ src/generated/
 .env
 .env.*
 !.env.example
+!.env.production.example
 coverage/
 *.log
 .npm-cache/

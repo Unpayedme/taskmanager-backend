@@ -2,6 +2,8 @@
 
 Date: 9 November 2026 (Asia/Shanghai)
 
+For subsequent production configuration and 52 release checks, see the [Railway + Vercel readiness report](deployment-readiness-2026-11-09.md).
+
 ## Result
 
 The local production builds and all 41 automated checks passed after the fixes below. Live Google sign-in was also verified after correcting the OAuth project and app branding. The npm advisory checks reported zero known vulnerabilities in both dependency trees after compatible updates. This is a source and functional audit of the current app, not a guarantee that every browser, deployment or attack scenario has been tested.

@@ -8,6 +8,7 @@ import app from '../../src/app.js';
 import { prisma } from '../../src/lib/prisma.js';
 import { env } from '../../src/config/env.js';
 import { tokenHash } from '../../src/utils/jwt.js';
+import { pruneExpiredSessions } from '../../src/services/maintenance.service.js';
 
 const enabled = Boolean(process.env.TEST_DATABASE_URL);
 const userIds: string[] = [];
@@ -167,6 +168,20 @@ describe('PostgreSQL API integration', { skip: !enabled, concurrency: false }, (
     const expired = jwt.sign({ kind: 'access', familyId: decoded.familyId }, env.ACCESS_TOKEN_SECRET, { algorithm: 'HS256', subject: account.user.id, issuer: 'task-manager', audience: 'task-manager-api', expiresIn: -1 });
     const result = await tasksRequest(expired).expect(401);
     assert.equal(result.body.error.code, 'TOKEN_EXPIRED');
+    await tasksRequest(account.token).expect(200);
+  });
+
+  test('session maintenance removes expired records and retains unexpired replay tombstones', async () => {
+    const account = await register();
+    const cutoff = new Date();
+    const expiredId = randomUUID();
+    const tombstoneId = randomUUID();
+    for (const [id, expiresAt] of [[expiredId, new Date(cutoff.getTime() - 60000)], [tombstoneId, new Date(cutoff.getTime() + 86400000)]] as const) {
+      await prisma.refreshSession.create({ data: { id, userId: account.user.id, familyId: randomUUID(), tokenHash: tokenHash(id), expiresAt, revokedAt: cutoff } });
+    }
+    await pruneExpiredSessions(cutoff);
+    assert.equal(await prisma.refreshSession.findUnique({ where: { id: expiredId } }), null);
+    assert.notEqual(await prisma.refreshSession.findUnique({ where: { id: tombstoneId } }), null);
     await tasksRequest(account.token).expect(200);
   });
 });

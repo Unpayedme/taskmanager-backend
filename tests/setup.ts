@@ -5,3 +5,4 @@ process.env.ACCESS_TOKEN_SECRET = 'test-access-secret-with-more-than-32-characte
 process.env.REFRESH_TOKEN_SECRET = 'test-refresh-secret-with-more-than-32-characters';
 process.env.COOKIE_SAME_SITE = 'lax';
 process.env.TRUST_PROXY = '0';
+process.env.API_PROXY_SECRET = '';

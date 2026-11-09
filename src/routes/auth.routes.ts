@@ -3,13 +3,15 @@ import rateLimit from 'express-rate-limit';
 import * as controller from '../controllers/auth.controller.js';
 import { requireTrustedOrigin } from '../middlewares/csrf.js';
 import { requireAuth } from '../middlewares/auth.js';
+import { clientRateLimitKey } from '../middlewares/proxy.js';
 
 const router = Router();
 const credentialsLimiter = rateLimit({
   windowMs: 15 * 60000, limit: 20, standardHeaders: 'draft-8', legacyHeaders: false,
+  keyGenerator: clientRateLimitKey,
   message: { error: { code: 'RATE_LIMITED', message: 'Too many sign-in attempts. Please try again later.' } },
 });
-const refreshLimiter = rateLimit({ windowMs: 60000, limit: 60, standardHeaders: 'draft-8', legacyHeaders: false });
+const refreshLimiter = rateLimit({ windowMs: 60000, limit: 60, standardHeaders: 'draft-8', legacyHeaders: false, keyGenerator: clientRateLimitKey });
 router.get('/config', controller.config);
 router.post('/register', requireTrustedOrigin, credentialsLimiter, controller.register);
 router.post('/login', requireTrustedOrigin, credentialsLimiter, controller.login);

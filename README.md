@@ -78,6 +78,8 @@ List filters: `search`, `status=PENDING|COMPLETED`, `due=today|upcoming|overdue|
 
 ## Validation
 
+See the [9 November 2026 application audit](docs/application-audit-2026-11-09.md) for verified coverage, resolved findings and release limitations.
+
 ```powershell
 # backend
 npm.cmd run build
@@ -113,6 +115,6 @@ $env:PLAYWRIGHT_CHANNEL = 'msedge'
 npm.cmd run test:e2e
 ```
 
-The tests create test accounts and exercise task CRUD, search, cached reload, offline task reads, mobile layout, queued refresh and logout across tabs. They require an empty browser session and create disposable users; use a dedicated development or test database.
+The tests create test accounts and exercise task CRUD, search, sorting, pagination recovery, cached reload, offline task reads, statistics failures, cache corruption, session races and logout across tabs. Both desktop and mobile touch viewports run by default. They require an empty browser session and create disposable users; use a dedicated development or test database. Offline viewing requires an existing authenticated session; reopening the app fully offline is not supported.
 
 References: [Google OpenID Connect](https://developers.google.com/identity/openid-connect/openid-connect), [Prisma client generation](https://docs.prisma.io/docs/orm/v7/prisma-client/setup-and-configuration/generating-prisma-client), [Quasar](https://quasar.dev/).

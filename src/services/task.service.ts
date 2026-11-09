@@ -17,7 +17,10 @@ export async function listTasks(userId: string, query: ListTaskInput) {
   const today = todayDate(query.today);
   if (query.due === 'today') where.dueDate = today;
   if (query.due === 'upcoming') where.dueDate = { gte: today };
-  if (query.due === 'overdue') { where.dueDate = { lt: today }; where.status = 'PENDING'; }
+  if (query.due === 'overdue') {
+    where.dueDate = { lt: today };
+    where.AND = [{ status: 'PENDING' }];
+  }
   if (query.due === 'none') where.dueDate = null;
   const orderBy: Prisma.TaskOrderByWithRelationInput[] = query.sort === 'due'
     ? [{ dueDate: { sort: 'asc', nulls: 'last' } }, { createdAt: 'desc' }, { id: 'asc' }]

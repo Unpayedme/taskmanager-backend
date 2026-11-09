@@ -40,7 +40,7 @@ export async function googleCallback(code: unknown, state: unknown, cookie: unkn
   if (!tokens.id_token) throw new AppError(401, 'INVALID_OAUTH', 'Google did not return an identity token.');
   const ticket = await client.verifyIdToken({ idToken: tokens.id_token, audience: env.GOOGLE_CLIENT_ID });
   const payload = ticket.getPayload();
-  if (!payload?.email || !payload.email_verified || (payload as typeof payload & { nonce?: string }).nonce !== flow.nonce) {
+  if (!payload?.email || !payload.sub || payload.email_verified !== true || (payload as typeof payload & { nonce?: string }).nonce !== flow.nonce) {
     throw new AppError(401, 'INVALID_OAUTH', 'A verified Google email is required.');
   }
   let user = await userRepository.findByGoogleId(payload.sub);

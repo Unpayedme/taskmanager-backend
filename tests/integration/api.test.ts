@@ -87,6 +87,46 @@ describe('PostgreSQL API integration', { skip: !enabled, concurrency: false }, (
     await request(app).patch(`/api/tasks/${randomUUID()}`).set('Authorization', `Bearer ${account.token}`).send({}).expect(400);
   });
 
+  test('sorting, pagination and all calendar filters agree with task statistics', async () => {
+    const account = await register('Calendar Tester');
+    const inputs = [
+      { title: 'Delta', dueDate: null },
+      { title: 'Alpha', description: 'Find this description', dueDate: '2026-10-01' },
+      { title: 'Charlie', dueDate: '2026-10-02' },
+      { title: 'Bravo', dueDate: '2026-09-30' },
+      { title: 'Echo', dueDate: '2026-09-29', status: 'COMPLETED' },
+    ];
+    const ids: string[] = [];
+    for (const input of inputs) {
+      const result = await request(app).post('/api/tasks').set('Authorization', `Bearer ${account.token}`).send(input).expect(201);
+      ids.push(result.body.task.id);
+    }
+    const list = async (query: Record<string, string | number>) => (await tasksRequest(account.token).query({ today: '2026-10-01', ...query }).expect(200)).body;
+    const first = await list({ sort: 'title', limit: 2, page: 1 });
+    const second = await list({ sort: 'title', limit: 2, page: 2 });
+    const third = await list({ sort: 'title', limit: 2, page: 3 });
+    assert.deepEqual([first, second, third].flatMap(page => page.tasks.map((task: { title: string }) => task.title)), ['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo']);
+    assert.equal(first.pages, 3);
+    assert.equal(first.total, 5);
+    assert.deepEqual((await list({ sort: 'due' })).tasks.map((task: { title: string }) => task.title), ['Echo', 'Bravo', 'Alpha', 'Charlie', 'Delta']);
+    assert.equal((await list({ sort: 'created' })).tasks[0].id, ids.at(-1));
+    for (const [due, expected] of Object.entries({ today: ['Alpha'], upcoming: ['Alpha', 'Charlie'], overdue: ['Bravo'], none: ['Delta'] })) {
+      assert.deepEqual((await list({ due, sort: 'title' })).tasks.map((task: { title: string }) => task.title), expected);
+    }
+    assert.equal((await list({ search: 'DESCRIPTION' })).tasks[0].title, 'Alpha');
+    const stats = await request(app).get('/api/tasks/stats').set('Authorization', `Bearer ${account.token}`).query({ today: '2026-10-01' }).expect(200);
+    assert.deepEqual(stats.body, { total: 5, pending: 4, completed: 1, overdue: 1, dueToday: 1 });
+    assert.equal((await list({ page: 99, limit: 2 })).tasks.length, 0);
+  });
+
+  test('combining completed and overdue filters cannot return pending tasks', async () => {
+    const account = await register();
+    await request(app).post('/api/tasks').set('Authorization', `Bearer ${account.token}`).send({ title: 'Overdue pending', dueDate: '2026-09-01' }).expect(201);
+    const result = await tasksRequest(account.token).query({ status: 'COMPLETED', due: 'overdue', today: '2026-10-01' }).expect(200);
+    assert.equal(result.body.total, 0);
+    assert.deepEqual(result.body.tasks, []);
+  });
+
   test('refresh rotation replaces the cookie and replay revokes the whole session family', async () => {
     const account = await register();
     const refreshed = await request(app).post('/api/auth/refresh').set('Origin', origin).set('Cookie', account.cookie).expect(200);

@@ -89,7 +89,14 @@ try {
         const headers = new Headers();
         for (const [name, value] of Object.entries(req.headers)) if (typeof value === 'string') headers.set(name, value);
         headers.set('x-vercel-forwarded-for', req.socket.remoteAddress || '127.0.0.1');
-        const incoming = new Request(`${frontendOrigin}${req.url}`, { method: req.method, headers, ...(!['GET', 'HEAD'].includes(req.method) ? { body } : {}) });
+        // Exercise the routing metadata seen in deployed Vercel function URLs.
+        const original = new URL(req.url, frontendOrigin);
+        const rewritten = new URL('/api/proxy', frontendOrigin);
+        rewritten.search = original.search;
+        const route = original.pathname.slice('/api/'.length);
+        rewritten.searchParams.set('__path', route);
+        rewritten.searchParams.set('path', route);
+        const incoming = new Request(rewritten, { method: req.method, headers, ...(!['GET', 'HEAD'].includes(req.method) ? { body } : {}) });
         const response = await proxy(incoming);
         for (const [name, value] of response.headers) if (name !== 'set-cookie') res.setHeader(name, value);
         const cookies = response.headers.getSetCookie();

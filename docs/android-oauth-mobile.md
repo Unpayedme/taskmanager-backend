@@ -35,9 +35,9 @@ Deploy the backend changes before using the new APK. `npm start` now applies che
 
 The Android API defaults to `https://platform-tech-taskmanager.vercel.app/api`. To use a different frontend or staging installation, set public build variable `QCLI_NATIVE_API_BASE_URL` to its HTTPS origin followed by `/api`. Never point it directly to Render or include credentials. Browser `QCLI_API_BASE_URL` remains `/api`.
 
-## Required Google Cloud setup
+## Google Cloud setup
 
-In the existing Task Manager Google Cloud project (`task-manager-514207`), create an **Android** OAuth client for:
+The **Android** OAuth client `Task Manager Android Debug` was created on 2026-11-09 in the existing Task Manager Google Cloud project (`task-manager-514207`). Its public client ID is `711325382900-jmhavc6iok8k3bvvun9nfqn1bp8t4a7j.apps.googleusercontent.com`, registered for:
 
 ```text
 Package: com.taskmanager.app
@@ -100,6 +100,6 @@ On an Android device with Google Play services, after registering the certificat
 - Open the editor and keyboard at the smallest screen size; scroll to all inputs and Save/Cancel; inspect status/navigation bar and cutout spacing in portrait and landscape.
 - Verify the web Google redirect flow and desktop task layout remain functional.
 
-Live Android Google sign-in and native cookie restoration still require device verification. At implementation time the Android OAuth client was not registered. No physical device was connected, and the existing emulator failed to start because its data partition needed roughly 12 GB while only about 4 GB was free. No emulator data was deleted to resolve that limitation.
+Live Android Google sign-in and native cookie restoration still require device verification. The Android OAuth client is now registered, and the deployed frontend proxy successfully returned a native login challenge from the backend. No physical device was connected, and the existing emulator failed to start because its data partition needed roughly 12 GB while only about 4 GB was free. No emulator data was deleted to resolve that limitation.
 
 Sources: [Capgo Google setup](https://github.com/Cap-go/capacitor-social-login/blob/main/docs/setup_google.md), [Capacitor 8 compatibility](https://capgo.app/docs/plugins/social-login/), [Capacitor HTTP](https://capacitorjs.com/docs/apis/http), [SystemBars safe areas](https://capacitorjs.com/docs/apis/system-bars).

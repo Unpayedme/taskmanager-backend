@@ -19,5 +19,7 @@ router.post('/refresh', requireTrustedOrigin, refreshLimiter, controller.refresh
 router.post('/logout', requireTrustedOrigin, controller.logout);
 router.get('/me', requireAuth, controller.me);
 router.get('/google', credentialsLimiter, controller.googleStart);
+router.post('/google/native/challenge', requireTrustedOrigin, credentialsLimiter, controller.nativeGoogleChallenge);
+router.post('/google/native', requireTrustedOrigin, credentialsLimiter, controller.nativeGoogleLogin);
 router.get('/google/callback', controller.googleCallback);
 export default router;

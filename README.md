@@ -121,3 +121,7 @@ npm.cmd run test:e2e
 The tests create test accounts and exercise task CRUD, search, sorting, pagination recovery, cached reload, offline task reads, statistics failures, cache corruption, session races and logout across tabs. Both desktop and mobile touch viewports run by default. They require an empty browser session and create disposable users; use a dedicated development or test database. Offline viewing requires an existing authenticated session; reopening the app fully offline is not supported.
 
 References: [Google OpenID Connect](https://developers.google.com/identity/openid-connect/openid-connect), [Prisma client generation](https://docs.prisma.io/docs/orm/v7/prisma-client/setup-and-configuration/generating-prisma-client), [Quasar](https://quasar.dev/).
+
+## Android Google sign-in and mobile layout
+
+See the [Android setup and verification guide](docs/android-oauth-mobile.md) for the native Google flow, existing-session transport, phone layout fixes, Google Cloud package/signing registration, Java 21 APK builds and final device checks.

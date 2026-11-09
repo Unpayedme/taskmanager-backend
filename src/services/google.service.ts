@@ -1,10 +1,11 @@
 import { createHash, randomBytes } from 'node:crypto';
 import jwt from 'jsonwebtoken';
-import { OAuth2Client } from 'google-auth-library';
+import { OAuth2Client, type TokenPayload } from 'google-auth-library';
 import { env, googleEnabled } from '../config/env.js';
 import { AppError } from '../utils/errors.js';
 import { userRepository } from '../repositories/user.repository.js';
 import { createLogin } from './auth.service.js';
+import { googleChallengeRepository } from '../repositories/google-challenge.repository.js';
 
 const client = new OAuth2Client(env.GOOGLE_CLIENT_ID, env.GOOGLE_CLIENT_SECRET, env.GOOGLE_REDIRECT_URI);
 
@@ -43,13 +44,43 @@ export async function googleCallback(code: unknown, state: unknown, cookie: unkn
   if (!payload?.email || !payload.sub || payload.email_verified !== true || (payload as typeof payload & { nonce?: string }).nonce !== flow.nonce) {
     throw new AppError(401, 'INVALID_OAUTH', 'A verified Google email is required.');
   }
+  return loginGoogleUser(payload);
+}
+
+async function loginGoogleUser(payload: TokenPayload) {
   let user = await userRepository.findByGoogleId(payload.sub);
   if (!user) {
-    const email = payload.email.toLowerCase();
+    const email = payload.email!.toLowerCase();
     // Never automatically link a password account based only on matching email.
     if (await userRepository.findByEmail(email)) throw new AppError(409, 'ACCOUNT_EXISTS', 'Use your email and password to sign in to your existing account.');
     const created = await userRepository.create({ googleId: payload.sub, email, name: (payload.name || email.split('@')[0]!).slice(0, 80) });
     return createLogin(created.id);
   }
   return createLogin(user.id);
+}
+
+export async function nativeGoogleChallenge() {
+  if (!googleEnabled) throw new AppError(503, 'GOOGLE_NOT_CONFIGURED', 'Google sign-in is not configured.');
+  await googleChallengeRepository.prune();
+  const nonce = randomBytes(32).toString('base64url');
+  const expiresAt = new Date(Date.now() + 300000);
+  const challenge = await googleChallengeRepository.create({ nonceHash: createHash('sha256').update(nonce).digest('hex'), expiresAt });
+  return { challengeId: challenge.id, nonce, expiresAt: expiresAt.toISOString() };
+}
+
+export async function nativeGoogleLogin(challengeId: string, idToken: string) {
+  if (!googleEnabled) throw new AppError(503, 'GOOGLE_NOT_CONFIGURED', 'Google sign-in is not configured.');
+  const challenge = await googleChallengeRepository.find(challengeId);
+  if (!challenge || challenge.expiresAt <= new Date()) throw new AppError(401, 'INVALID_OAUTH', 'Google sign-in expired. Please try again.');
+  let payload: TokenPayload | undefined;
+  try {
+    payload = (await client.verifyIdToken({ idToken, audience: env.GOOGLE_CLIENT_ID })).getPayload();
+  } catch { throw new AppError(401, 'INVALID_OAUTH', 'Google identity could not be verified.'); }
+  const nonce = (payload as TokenPayload & { nonce?: unknown } | undefined)?.nonce;
+  if (!payload?.sub || !payload.email || payload.email_verified !== true || typeof nonce !== 'string' || createHash('sha256').update(nonce).digest('hex') !== challenge.nonceHash) {
+    throw new AppError(401, 'INVALID_OAUTH', 'Google sign-in verification failed.');
+  }
+  // Atomic consumption prevents simultaneous or replayed identity-token exchanges.
+  if ((await googleChallengeRepository.consume(challenge.id, challenge.nonceHash)).count !== 1) throw new AppError(401, 'INVALID_OAUTH', 'Google sign-in has already been used.');
+  return loginGoogleUser(payload);
 }

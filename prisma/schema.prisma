@@ -51,3 +51,11 @@ model RefreshSession {
   @@index([userId, familyId, revokedAt])
   @@index([expiresAt])
 }
+
+model NativeGoogleChallenge {
+  id        String   @id @default(uuid()) @db.Uuid
+  nonceHash String   @db.Char(64)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}

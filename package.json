@@ -11,6 +11,7 @@
     "prelint": "node scripts/prepare-build.mjs",
     "lint": "oxlint --deny-warnings src scripts tests prisma7.config.ts",
     "start": "node dist/server.js",
+    "prestart": "prisma migrate deploy --config prisma7.config.ts",
     "start:render": "npm run db:deploy && node --enable-source-maps dist/server.js",
     "test": "npm run db:generate && tsx --test tests/*.test.ts",
     "test:integration": "npm run db:generate && tsx --test tests/integration/*.test.ts",

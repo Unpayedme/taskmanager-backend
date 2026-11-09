@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express';
-import { registerSchema, loginSchema } from '../schema/auth.schema.js';
+import { registerSchema, loginSchema, nativeGoogleSchema } from '../schema/auth.schema.js';
 import * as auth from '../services/auth.service.js';
 import * as google from '../services/google.service.js';
 import { env, googleEnabled } from '../config/env.js';
@@ -7,7 +7,14 @@ import { refreshCookieName, oauthCookieName, oauthCookieOptions, setRefreshCooki
 import { AppError } from '../utils/errors.js';
 import { userRepository } from '../repositories/user.repository.js';
 
-export const config: RequestHandler = (_req, res) => { res.json({ googleEnabled }); };
+export const config: RequestHandler = (_req, res) => { res.json({ googleEnabled, googleClientId: googleEnabled ? env.GOOGLE_CLIENT_ID : null }); };
+export const nativeGoogleChallenge: RequestHandler = async (_req, res) => { res.json(await google.nativeGoogleChallenge()); };
+export const nativeGoogleLogin: RequestHandler = async (req, res) => {
+  const { challengeId, idToken } = nativeGoogleSchema.parse(req.body);
+  const result = await google.nativeGoogleLogin(challengeId, idToken);
+  setRefreshCookie(res, result.refreshToken);
+  res.json({ accessToken: result.accessToken, user: result.user });
+};
 export const register: RequestHandler = async (req, res) => {
   const result = await auth.register(registerSchema.parse(req.body));
   setRefreshCookie(res, result.refreshToken);

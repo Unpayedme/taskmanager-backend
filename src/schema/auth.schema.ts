@@ -6,3 +6,4 @@ export const registerSchema = z.object({
   name: z.string().trim().min(1).max(80), email, password,
 }).strict();
 export const loginSchema = z.object({ email, password: z.string().min(1).max(128) }).strict();
+export const nativeGoogleSchema = z.object({ challengeId: z.string().uuid(), idToken: z.string().min(1).max(16000) }).strict();

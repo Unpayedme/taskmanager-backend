@@ -9,6 +9,7 @@ import { prisma } from '../../src/lib/prisma.js';
 import { env } from '../../src/config/env.js';
 import { tokenHash } from '../../src/utils/jwt.js';
 import { pruneExpiredSessions } from '../../src/services/maintenance.service.js';
+import { googleChallengeRepository } from '../../src/repositories/google-challenge.repository.js';
 
 const enabled = Boolean(process.env.TEST_DATABASE_URL);
 const userIds: string[] = [];
@@ -35,6 +36,16 @@ describe('PostgreSQL API integration', { skip: !enabled, concurrency: false }, (
   after(async () => {
     if (userIds.length) await prisma.user.deleteMany({ where: { id: { in: userIds } } });
     await prisma.$disconnect();
+  });
+
+  test('a native Google challenge can be consumed only once across concurrent requests', async () => {
+    const challenge = await googleChallengeRepository.create({ nonceHash: 'a'.repeat(64), expiresAt: new Date(Date.now() + 60000) });
+    const results = await Promise.all([googleChallengeRepository.consume(challenge.id, challenge.nonceHash), googleChallengeRepository.consume(challenge.id, challenge.nonceHash)]);
+    assert.equal(results.reduce((sum, result) => sum + result.count, 0), 1);
+    const expired = await googleChallengeRepository.create({ nonceHash: 'b'.repeat(64), expiresAt: new Date(0) });
+    assert.equal((await googleChallengeRepository.consume(expired.id, expired.nonceHash)).count, 0);
+    await googleChallengeRepository.prune();
+    assert.equal(await googleChallengeRepository.find(expired.id), null);
   });
 
   test('registration and login return safe users and HttpOnly refresh cookies', async () => {

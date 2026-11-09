@@ -40,6 +40,8 @@ In PowerShell, use `npm.cmd` if execution policy blocks the `npm.ps1` wrapper.
 
 ## Google sign-in
 
+Select the Google Cloud project for Task Manager and check **Google Auth Platform > Branding** before creating or selecting its Web application client. The Google consent-screen name comes from that project's branding, not the frontend page title or OAuth client display name. Credentials from a project branded ServiceHub will continue to show ServiceHub during Google sign-in. Use a separate Task Manager project if the other project still serves another app.
+
 Create a Google OAuth **Web application** client. Add `http://localhost:3000/api/auth/google/callback` as an authorized redirect URI, and set `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_REDIRECT_URI` in the backend `.env`. Restart the API; the frontend displays Google sign-in when configured. OAuth uses state, nonce, PKCE, and verification of Google's ID-token signature, issuer, audience, expiry and verified email. It never places an access token in the redirect URL. A matching password account is not automatically linked to a Google identity; use its existing password to sign in.
 
 ## API

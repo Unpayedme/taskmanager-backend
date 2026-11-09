@@ -4,7 +4,7 @@ Date: 9 November 2026 (Asia/Shanghai)
 
 ## Result
 
-The local production builds and all 41 automated checks passed after the fixes below. The npm advisory checks reported zero known vulnerabilities in both dependency trees after compatible updates. This is a source and functional audit of the current app, not a guarantee that every browser, deployment or attack scenario has been tested.
+The local production builds and all 41 automated checks passed after the fixes below. Live Google sign-in was also verified after correcting the OAuth project and app branding. The npm advisory checks reported zero known vulnerabilities in both dependency trees after compatible updates. This is a source and functional audit of the current app, not a guarantee that every browser, deployment or attack scenario has been tested.
 
 Repositories: [backend](https://github.com/Unpayedme/taskmanager-backend) and [frontend](https://github.com/Unpayedme/taskmanager-frontend).
 
@@ -32,6 +32,7 @@ Repositories: [backend](https://github.com/Unpayedme/taskmanager-backend) and [f
 - Browser tests against the production SPA and local API: **16 passed**, running 8 scenarios at desktop 1280 x 800 and mobile 390 x 844 with touch emulation in Microsoft Edge.
 - Desktop and mobile dashboard screenshots were captured for visual inspection.
 - Temporary API, frontend server and isolated PostgreSQL cluster were stopped after the browser run.
+- Live Google sign-in: passed. Google's account chooser displays Task Manager, the backend recorded a new login session for the Google account, and the owner confirmed reaching the Task Manager dashboard without errors.
 
 ## Functional and security coverage
 
@@ -48,11 +49,11 @@ Repositories: [backend](https://github.com/Unpayedme/taskmanager-backend) and [f
 
 ## Limits and release items
 
-1. **Live Google sign-in remains pending account interaction.** Local configuration passes validation, the configured client ID has the expected format, and the callback path is correct. Automated token verification does not prove that the Google Console redirect configuration, consent screen or real account flow is correct.
+1. **Google sign-in is verified locally; production OAuth setup remains.** The old client identified itself as `servicehub cordova`. A dedicated project, `task-manager-514207`, now has Task Manager branding and a Web application client with JavaScript origin `http://localhost:5173` and redirect `http://localhost:3000/api/auth/google/callback`. The backend's ignored `.env` was updated and the API restarted. The live account chooser shows **Task Manager**, the callback created a new Google login session, and the owner confirmed reaching the dashboard without errors. The project remains in Testing mode with the owner's account listed as a test user. Deployment requires the production HTTPS origins, callback and audience configuration. Credentials are local configuration and are excluded from Git.
 2. **Offline support is a read-only cached view in an existing authenticated session.** There is no service worker or offline session restoration. Reopening the app fully offline and queuing offline writes are outside the implemented feature. Cache snapshots are limited to six query pages and 24 hours and clear on logout/account changes.
 3. **Production hosting was not deployed or verified.** Follow the README for HTTPS, exact frontend Origin, private PostgreSQL access, migrations, cookie settings and trusted proxy hops. A separate API origin also needs to be allowed by the frontend CSP. Multiple API processes require a shared rate-limit store; expired session rows need operational pruning.
 4. **Browser coverage is bounded.** Mobile checks emulate a touch viewport in Edge. Physical devices, Safari and Firefox still require release testing.
-5. **Hosted data was preserved.** All write-based integration and browser checks used a newly created local PostgreSQL test database, not the configured hosted database.
+5. **Automated test data stayed local.** API integration and automated browser checks used a newly created local PostgreSQL test database. The owner's manual Google sign-in used the configured application database and created normal authentication session records.
 
 ## Reproduce
 

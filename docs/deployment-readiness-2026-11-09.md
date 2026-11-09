@@ -1,6 +1,6 @@
 # Railway + Vercel deployment readiness
 
-Hosting update: the backend now targets Render. Follow the [Render + Vercel guide](deployment-render-vercel.md). The reported Render build omitted development type packages; the new production build explicitly includes them and runs the backend lint check. A clean production-mode install/build, backend lint and 20 unit tests, six proxy tests, and frontend build/type/lint checks passed for this change. The Railway verification below records the earlier preparation.
+Hosting update: the backend now targets Render. Follow the [Render + Vercel guide](deployment-render-vercel.md). The reported Render build omitted development type packages; the new production build explicitly includes them and runs the backend lint check. The normal build/lint commands also restore missing development packages through lifecycle hooks, so manually configured Render services using `npm install && npm run build` are supported. A clean production-mode install/build, backend lint and 20 unit tests, six proxy tests, and frontend build/type/lint checks passed for this change. The Railway verification below records the earlier preparation.
 
 Prepared on 9 November 2026. Follow the [deployment guide](deployment-railway-vercel.md) for the hosting settings.
 

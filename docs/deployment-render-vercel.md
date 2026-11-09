@@ -17,7 +17,9 @@ In the existing Render backend service, select the backend repository, branch `m
 
 `build:render` runs `npm ci --include=dev && npm run lint && npm run build`. The explicit install includes TypeScript, lint and declaration packages even when `NODE_ENV=production` or npm's omit setting excludes development dependencies. `npm run build` generates Prisma Client and compiles TypeScript. Backend `npm run lint` checks the handwritten source, scripts and tests without changing files.
 
-Save the settings and redeploy the latest commit. Adding `render.yaml` to Git does **not** update a manually created service's commands automatically. The file is for Render Blueprint imports/syncs. If a stale install remains, use **Clear build cache & deploy**.
+Existing services that still run `npm install && npm run build` are also supported. The `prebuild` and `prelint` lifecycle hooks check the declared development packages and run `npm ci --include=dev` only when any are missing. The build therefore restores the required type declarations and compiler before compiling, even after a production-only install. Normal development builds with installed dependencies skip this step. Dependency-install errors stop the build; strict TypeScript checks remain enabled. The hooks do not run during API startup.
+
+Save the settings and redeploy the latest commit. Adding `render.yaml` to Git does **not** update a manually created service's commands automatically. The file is for Render Blueprint imports/syncs. The normal build hook fixes the missing-dependency failure even before the existing build command is updated. If a stale install remains, use **Clear build cache & deploy**.
 
 `start:render` applies checked-in migrations and then starts the compiled API. A migration failure stops startup. This supports Free services, which do not offer a separate pre-deploy command. For a paid service, you can instead set Pre-Deploy Command to `npm run db:deploy` and Start Command to `node --enable-source-maps dist/server.js`. Keep one API instance while rate limits use an in-memory store.
 

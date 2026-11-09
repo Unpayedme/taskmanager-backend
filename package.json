@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "prisma generate --config prisma7.config.ts && tsc",
+    "build:render": "npm ci --include=dev && npm run lint && npm run build",
+    "lint": "oxlint --deny-warnings src scripts tests prisma7.config.ts",
     "start": "node dist/server.js",
+    "start:render": "npm run db:deploy && node --enable-source-maps dist/server.js",
     "test": "npm run db:generate && tsx --test tests/*.test.ts",
     "test:integration": "npm run db:generate && tsx --test tests/integration/*.test.ts",
     "db:generate": "prisma generate --config prisma7.config.ts",
@@ -23,7 +26,6 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "nodemailer": "^10.0.13",
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",
     "cookie-parser": "^1.4.7",
@@ -34,21 +36,23 @@
     "google-auth-library": "^10.5.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^10.0.13",
     "pg": "^8.23.1",
-    "zod": "^4.6.5",
-    "prisma": "7.10.0"
+    "prisma": "7.10.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@types/nodemailer": "^8.0.2",
-    "tsc-alias": "^1.9.7",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.6.3",
+    "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^6.0.3",
+    "oxlint": "^1.92.0",
     "supertest": "^7.2.2",
+    "tsc-alias": "^1.9.7",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3"
   },

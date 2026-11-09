@@ -85,6 +85,7 @@ See the [9 November 2026 application audit](docs/application-audit-2026-11-09.md
 ```powershell
 # backend
 npm.cmd run build
+npm.cmd run lint
 npm.cmd test
 
 # frontend
@@ -106,7 +107,7 @@ The integration suite creates its own test users and removes them afterward. It 
 
 ## Production
 
-Follow the [Railway + Vercel deployment guide](docs/deployment-railway-vercel.md). The checked-in configuration builds the API with Railpack, runs database migrations before deployment, checks database readiness, and serves the frontend through Vercel with a server-only API proxy. Production authentication uses secure cookies on the Vercel frontend host. Use Node 26 and configure the required hosting variables before deploying.
+Follow the [Render + Vercel deployment guide](docs/deployment-render-vercel.md). The backend uses a native Render Node service with an explicit build-dependency install, lint/type checks, migrations before startup and database readiness checks. The Vercel frontend keeps secure cookies on its own host through the server-only API proxy. Existing Render services must update their dashboard build/start commands as described in the guide.
 
 ## Browser tests
 

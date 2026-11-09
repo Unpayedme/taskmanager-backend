@@ -1,5 +1,7 @@
 # Deploy Task Manager on Railway and Vercel
 
+The active hosting target has changed to Render. Follow the [Render + Vercel guide](deployment-render-vercel.md); this Railway guide is retained for reference.
+
 The backend repository runs on Railway with PostgreSQL. The frontend repository builds a Quasar SPA on Vercel. Both use Node **26.x**, pinned in `package.json`.
 
 The browser calls the Vercel site's `/api` path. A server-only Vercel function forwards requests to Railway, preserves `Origin`, cookies and authorization, and returns Google redirects to the browser. Cookies therefore remain on the frontend host with `Secure`, `HttpOnly`, and `SameSite=Lax`. Keep the browser API base `/api`.

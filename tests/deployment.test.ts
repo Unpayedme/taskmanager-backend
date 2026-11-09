@@ -26,7 +26,7 @@ test('production requires HTTPS and distinct non-placeholder token/proxy secrets
   assert.equal(environmentSchema.safeParse({ ...google, GOOGLE_REDIRECT_URI: 'https://api.example.com/api/auth/google/callback' }).success, false);
 });
 
-test('Railway endpoints reject forged proxy headers while health checks stay public', async () => {
+test('backend endpoints reject forged proxy headers while health checks stay public', async () => {
   await request(app).get('/api/health').expect(200);
   await request(app).get('/api/auth/config').set('x-taskmanager-client-ip', '203.0.113.1').expect(403);
   await request(app).get('/api/auth/config').set('x-taskmanager-proxy-secret', 'forged').set('x-taskmanager-client-ip', '203.0.113.1').expect(403);

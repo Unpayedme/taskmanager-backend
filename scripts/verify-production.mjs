@@ -75,7 +75,7 @@ try {
   execFileSync(openssl, ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-keyout', keyPath, '-out', certPath, '-days', '1', '-subj', '/CN=localhost', '-addext', 'subjectAltName=DNS:localhost,IP:127.0.0.1'], { windowsHide: true, timeout: 30000, stdio: 'ignore' });
   api = spawn(process.execPath, ['dist/server.js'], { cwd: backend, env: environment, windowsHide: true, stdio: 'inherit' });
   await waitUntilReady();
-  assert.equal((await fetch(`${apiOrigin}/api/auth/config`)).status, 403, 'The Railway API must reject direct unauthenticated proxy access.');
+  assert.equal((await fetch(`${apiOrigin}/api/auth/config`)).status, 403, 'The backend API must reject direct unauthenticated proxy access.');
   const { createApiProxy } = await import(pathToFileURL(join(frontend, 'server/api-proxy.mjs')).href);
   const proxy = createApiProxy({ origin: apiOrigin, secret: proxySecret });
   const spa = join(frontend, 'dist', 'spa');

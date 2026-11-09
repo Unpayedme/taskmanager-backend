@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: taskmanager-backend
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: npm run build:render
+    startCommand: npm run start:render
+    healthCheckPath: /api/ready
+    numInstances: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 26.7.0
+      - key: DATABASE_URL
+        sync: false
+      - key: FRONTEND_ORIGIN
+        sync: false
+      - key: ACCESS_TOKEN_SECRET
+        generateValue: true
+      - key: REFRESH_TOKEN_SECRET
+        generateValue: true
+      - key: API_PROXY_SECRET
+        sync: false
+      - key: COOKIE_SAME_SITE
+        value: lax
+      - key: TRUST_PROXY
+        value: "1"
